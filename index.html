@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Canes個人開支管理</title>
+  <title>Canes個人開支管理 · 登入</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
   <style>
@@ -31,7 +31,7 @@
       background: white;
       border-radius: 28px;
       padding: 40px 36px;
-      max-width: 420px;
+      max-width: 440px;
       width: 100%;
       box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.12);
       border: 1px solid #edf2f7;
@@ -78,7 +78,7 @@
       font-size: 15px;
       font-family: inherit;
       color: #0f172a;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
       transition: 0.1s;
       background: #f8fafc;
     }
@@ -104,8 +104,15 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
+      margin-bottom: 12px;
     }
     .login-card button:hover { background: #2563eb; }
+    .login-card button.secondary {
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #e2e8f0;
+    }
+    .login-card button.secondary:hover { background: #e2e8f0; }
     .login-card .error-msg {
       background: #fef2f2;
       border: 1px solid #fca5a5;
@@ -113,28 +120,67 @@
       font-size: 13px;
       padding: 10px 14px;
       border-radius: 10px;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
       display: none;
       align-items: center;
       gap: 8px;
     }
     .login-card .error-msg.show { display: flex; }
+    .login-card .success-msg {
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #166534;
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .login-card .success-msg.show { display: flex; }
     .login-card .hint {
       font-size: 12px;
       color: #94a3b8;
       text-align: center;
-      margin-top: 20px;
+      margin-top: 16px;
       line-height: 1.6;
     }
+    .tab-switch {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 12px;
+    }
+    .tab-switch button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      background: transparent;
+      color: #64748b;
+      font-weight: 600;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: 0.15s;
+      margin-bottom: 0;
+    }
+    .tab-switch button.active {
+      background: white;
+      color: #0f172a;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
 
-    /* ===== 主畫面 (預設隱藏) ===== */
+    /* ===== 主畫面 ===== */
     .app-screen {
       display: none;
       padding: 24px 20px 40px;
     }
     .app-screen.active { display: block; }
 
-    /* 登出按鈕 */
     .logout-btn {
       position: fixed;
       top: 20px;
@@ -157,7 +203,6 @@
     }
     .logout-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
 
-    /* 以下為原本的儀表板樣式 */
     .dashboard {
       max-width: 1500px;
       margin: 0 auto;
@@ -246,6 +291,22 @@
       border: 1px solid #e2e8f0;
     }
     .toolbar button.secondary:hover { background: #e2e8f0; }
+
+    .save-status {
+      font-size: 12px;
+      color: #16a34a;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #f0fdf4;
+      padding: 6px 14px;
+      border-radius: 40px;
+      border: 1px solid #bbf7d0;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .save-status.show { opacity: 1; }
 
     .deposit-banner {
       border-radius: 18px;
@@ -580,18 +641,27 @@
 </head>
 <body>
 
-<!-- ===================== 登入畫面 ===================== -->
+<!-- ===================== 登入 / 註冊畫面 ===================== -->
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
     <div class="logo">
       <i class="fas fa-lock"></i>
     </div>
     <h1>個人開支管理</h1>
-    <p class="subtitle">請登入以查看您的財務資料</p>
+    <p class="subtitle" id="authSubtitle">請登入您的帳號</p>
 
-    <div class="error-msg" id="loginError">
+    <div class="tab-switch">
+      <button id="tabLogin" class="active"><i class="fas fa-sign-in-alt"></i> 登入</button>
+      <button id="tabRegister"><i class="fas fa-user-plus"></i> 註冊</button>
+    </div>
+
+    <div class="error-msg" id="authError">
       <i class="fas fa-exclamation-circle"></i>
-      <span id="loginErrorText">帳號或密碼錯誤，請重新輸入。</span>
+      <span id="authErrorText"></span>
+    </div>
+    <div class="success-msg" id="authSuccess">
+      <i class="fas fa-check-circle"></i>
+      <span id="authSuccessText"></span>
     </div>
 
     <label for="username"><i class="fas fa-user"></i> 帳號</label>
@@ -600,11 +670,16 @@
     <label for="password"><i class="fas fa-key"></i> 密碼</label>
     <input type="password" id="password" placeholder="請輸入密碼" autocomplete="current-password">
 
-    <button id="loginBtn"><i class="fas fa-sign-in-alt"></i> 登入</button>
+    <div id="confirmPasswordGroup" style="display:none;">
+      <label for="confirmPassword"><i class="fas fa-key"></i> 確認密碼</label>
+      <input type="password" id="confirmPassword" placeholder="請再次輸入密碼" autocomplete="new-password">
+    </div>
+
+    <button id="authBtn"><i class="fas fa-sign-in-alt"></i> 登入</button>
 
     <div class="hint">
-      <i class="fas fa-info-circle"></i> 登入狀態會儲存在此裝置，下次開啟無需再次登入。<br>
-      在任何電腦或手機輸入正確帳密皆可登入。
+      <i class="fas fa-info-circle"></i> 每個帳號的資料會獨立儲存，下次登入可看到上次修改的內容。<br>
+      在任何電腦或手機用同一組帳密登入皆可。
     </div>
   </div>
 </div>
@@ -614,7 +689,6 @@
   <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> 登出</button>
 
   <div class="dashboard">
-    <!-- 頂部 -->
     <div class="header">
       <h1><i class="fas fa-wallet"></i> 澳門個人開支管理</h1>
       <div class="total-balance-card">
@@ -637,17 +711,16 @@
       </div>
     </div>
 
-    <!-- 工具列 -->
     <div class="toolbar">
       <label><i class="fas fa-calendar-day"></i> 檢查日期：</label>
       <input type="date" id="checkDate">
       <button id="btnCheckToday"><i class="fas fa-search"></i> 檢查今日</button>
       <button id="btnCheckNext30" class="secondary"><i class="fas fa-calendar-week"></i> 檢查未來 30 日</button>
       <span style="flex:1;"></span>
-      <span style="font-size:13px; color:#64748b;"><i class="fas fa-info-circle"></i> 存款提醒只顯示真正不足的第一個月份</span>
+      <span class="save-status" id="saveStatus"><i class="fas fa-check-circle"></i> 已自動儲存</span>
+      <span style="font-size:13px; color:#64748b;"><i class="fas fa-info-circle"></i> 存款提醒只顯示真正不足的第一個月</span>
     </div>
 
-    <!-- 存款提醒總覽 -->
     <div id="depositBanner" class="deposit-banner green">
       <i class="fas fa-check-circle"></i>
       <div class="content" id="depositBannerContent">
@@ -656,10 +729,8 @@
       </div>
     </div>
 
-    <!-- 銀行卡片 -->
     <div class="bank-grid" id="bankGrid"></div>
 
-    <!-- 保險 & 其他開支 -->
     <div class="extra-section">
       <div class="extra-card">
         <h3><i class="fas fa-shield-alt"></i> 保險支出</h3>
@@ -693,162 +764,336 @@
 
 <script>
   // ============================================================
-  // 帳號密碼設定 (可自行修改)
+  // 儲存機制：使用 localStorage 按帳號區分資料
   // ============================================================
-  const VALID_USERNAME = 'admin';
-  const VALID_PASSWORD = '1234';
-  const AUTH_KEY = 'expense_app_logged_in';
+  const USERS_KEY = 'expense_app_users';        // 所有註冊帳號
+  const SESSION_KEY = 'expense_app_session';    // 目前登入的帳號
+  const DATA_PREFIX = 'expense_app_data_';      // 每個帳號的資料前綴
+
+  function getUsers() {
+    try {
+      return JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveUsers(users) {
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  }
+
+  function getSession() {
+    return localStorage.getItem(SESSION_KEY) || null;
+  }
+
+  function setSession(username) {
+    localStorage.setItem(SESSION_KEY, username);
+  }
+
+  function clearSession() {
+    localStorage.removeItem(SESSION_KEY);
+  }
+
+  function loadUserData(username) {
+    try {
+      const raw = localStorage.getItem(DATA_PREFIX + username);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function saveUserData(username, data) {
+    try {
+      localStorage.setItem(DATA_PREFIX + username, JSON.stringify(data));
+    } catch (e) {
+      console.warn('儲存失敗', e);
+    }
+  }
 
   // ============================================================
-  // 登入 / 登出邏輯
+  // 預設資料 (新註冊帳號會使用這份)
+  // ============================================================
+  function getDefaultData() {
+    return {
+      banksData: [
+        { 
+          name: 'BNU', icon: 'fa-building-columns', region: 'mo',
+          balanceMop: 2500, balanceHkd: 8096, balanceCny: 0, balanceJpy: 417230,
+          mopAmount: 7000, mopTime: '每月20交,公用戶5000+蘭2000',
+          hkdAmount: 8100, hkdTime: '每月1日交,橫琴供款2000+車位賃6100',
+          creditCardAmount: '', creditCardDay: '1'
+        },
+        { 
+          name: 'HSBC', icon: 'fa-building-columns', region: 'mo',
+          balanceMop: 17718, balanceHkd: 0, balanceCny: 0, balanceJpy: 0,
+          mopAmount: 15800, mopTime: '每個月1日交,房賃',
+          hkdAmount: 0, hkdTime: '',
+          creditCardAmount: '', creditCardDay: '1'
+        },
+        { 
+          name: 'ICBC', icon: 'fa-building-columns', region: 'mo',
+          balanceMop: 10335, balanceHkd: 50, balanceCny: 13570, balanceJpy: 0,
+          mopAmount: 6300, mopTime: '每個月1日交,車賃',
+          hkdAmount: 0, hkdTime: '',
+          creditCardAmount: '3820', creditCardDay: '1'
+        },
+        { 
+          name: 'BOC', icon: 'fa-building-columns', region: 'mo',
+          balanceMop: 16690, balanceHkd: 4459, balanceCny: 1000, balanceJpy: 0,
+          mopAmount: 0, mopTime: '',
+          hkdAmount: 1020, hkdTime: '可以供可以唔供的基金',
+          creditCardAmount: '12342', creditCardDay: '1'
+        },
+        { 
+          name: '大豐(Mpay)', icon: 'fa-mobile-screen', region: 'mo',
+          balanceMop: 8975, balanceHkd: 0, balanceCny: 0, balanceJpy: 0,
+          mopAmount: 8000, mopTime: '每月1日交,日常使用',
+          hkdAmount: 0, hkdTime: '',
+          creditCardAmount: '', creditCardDay: '1'
+        },
+        { 
+          name: 'BOC(內地)', icon: 'fa-building-columns', region: 'cn',
+          balanceMop: 0, balanceHkd: 0, balanceCny: 15245.25, balanceJpy: 0,
+          mopAmount: 0, mopTime: '',
+          hkdAmount: 0, hkdTime: '',
+          creditCardAmount: '', creditCardDay: '1'
+        },
+        { 
+          name: 'ICBC(內地)', icon: 'fa-building-columns', region: 'cn',
+          balanceMop: 0, balanceHkd: 0, balanceCny: 1456.43, balanceJpy: 0,
+          mopAmount: 0, mopTime: '',
+          hkdAmount: 0, hkdTime: '',
+          creditCardAmount: '', creditCardDay: '1'
+        },
+        { 
+          name: '支付寶', icon: 'fa-mobile-screen', region: 'cn',
+          balanceMop: 0, balanceHkd: 0, balanceCny: 957, balanceJpy: 0,
+          mopAmount: 0, mopTime: '',
+          hkdAmount: 0, hkdTime: '',
+          creditCardAmount: '', creditCardDay: '1'
+        },
+        { 
+          name: '微信支付', icon: 'fa-mobile-screen', region: 'cn',
+          balanceMop: 0, balanceHkd: 0, balanceCny: 9321, balanceJpy: 0,
+          mopAmount: 0, mopTime: '',
+          hkdAmount: 0, hkdTime: '',
+          creditCardAmount: '', creditCardDay: '1'
+        }
+      ],
+      insuranceEvents: [
+        { month: 7, day: 10, amount: 38000, desc: '保險 7月' },
+        { month: 8, day: 10, amount: 22000, desc: '保險 8月' },
+        { month: 9, day: 10, amount: 17100, desc: '保險 9月' },
+        { month: 9, day: 22, amount: 51000, desc: '保險 9月(原10月)' }
+      ],
+      otherMonthlyExpense: 500 + 200 + 645,
+      salaryDay: 15,
+      salaryNormal: 66000,
+      salaryDouble: 126000,
+      insuranceDetail: '每年7月10日交38000,8月10日交22000,9月10日交17100,9月22日交51000',
+      otherExpenses: '水費每月約500、電費每月約200、管理費645'
+    };
+  }
+
+  // ============================================================
+  // 登入 / 註冊 邏輯
   // ============================================================
   const loginScreen = document.getElementById('loginScreen');
   const appScreen = document.getElementById('appScreen');
-  const loginError = document.getElementById('loginError');
-  const loginErrorText = document.getElementById('loginErrorText');
+  const authError = document.getElementById('authError');
+  const authErrorText = document.getElementById('authErrorText');
+  const authSuccess = document.getElementById('authSuccess');
+  const authSuccessText = document.getElementById('authSuccessText');
   const usernameInput = document.getElementById('username');
   const passwordInput = document.getElementById('password');
-  const loginBtn = document.getElementById('loginBtn');
+  const confirmPasswordInput = document.getElementById('confirmPassword');
+  const confirmPasswordGroup = document.getElementById('confirmPasswordGroup');
+  const authBtn = document.getElementById('authBtn');
   const logoutBtn = document.getElementById('logoutBtn');
+  const tabLogin = document.getElementById('tabLogin');
+  const tabRegister = document.getElementById('tabRegister');
+  const authSubtitle = document.getElementById('authSubtitle');
 
-  function showApp() {
-    loginScreen.style.display = 'none';
-    appScreen.classList.add('active');
-    // 初始化儀表板（只在登入後首次初始化）
-    if (!window.__dashboardInitialized) {
-      window.__dashboardInitialized = true;
-      if (typeof initDashboard === 'function') initDashboard();
-    }
-  }
+  let isRegisterMode = false;
 
-  function showLogin() {
-    loginScreen.style.display = 'flex';
-    appScreen.classList.remove('active');
-    usernameInput.value = '';
-    passwordInput.value = '';
-    loginError.classList.remove('show');
-  }
-
-  function checkAuth() {
-    const loggedIn = localStorage.getItem(AUTH_KEY);
-    if (loggedIn === 'true') {
-      showApp();
+  function switchMode(register) {
+    isRegisterMode = register;
+    if (register) {
+      tabRegister.classList.add('active');
+      tabLogin.classList.remove('active');
+      confirmPasswordGroup.style.display = 'block';
+      authBtn.innerHTML = '<i class="fas fa-user-plus"></i> 註冊';
+      authSubtitle.textContent = '建立新帳號，開始管理您的開支';
     } else {
-      showLogin();
+      tabLogin.classList.add('active');
+      tabRegister.classList.remove('active');
+      confirmPasswordGroup.style.display = 'none';
+      authBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> 登入';
+      authSubtitle.textContent = '請登入您的帳號';
     }
+    authError.classList.remove('show');
+    authSuccess.classList.remove('show');
+    confirmPasswordInput.value = '';
   }
 
-  loginBtn.addEventListener('click', () => {
+  tabLogin.addEventListener('click', () => switchMode(false));
+  tabRegister.addEventListener('click', () => switchMode(true));
+
+  function showError(msg) {
+    authErrorText.textContent = msg;
+    authError.classList.add('show');
+    authSuccess.classList.remove('show');
+  }
+
+  function showSuccess(msg) {
+    authSuccessText.textContent = msg;
+    authSuccess.classList.add('show');
+    authError.classList.remove('show');
+  }
+
+  authBtn.addEventListener('click', () => {
     const user = usernameInput.value.trim();
     const pass = passwordInput.value.trim();
 
-    if (user === VALID_USERNAME && pass === VALID_PASSWORD) {
-      localStorage.setItem(AUTH_KEY, 'true');
-      loginError.classList.remove('show');
-      showApp();
+    if (!user || !pass) {
+      showError('請輸入帳號和密碼。');
+      return;
+    }
+
+    const users = getUsers();
+
+    if (isRegisterMode) {
+      // 註冊模式
+      const confirm = confirmPasswordInput.value.trim();
+      if (pass !== confirm) {
+        showError('兩次輸入的密碼不一致。');
+        return;
+      }
+      if (pass.length < 4) {
+        showError('密碼長度至少 4 個字元。');
+        return;
+      }
+      if (users[user]) {
+        showError('此帳號已被註冊，請改用其他帳號。');
+        return;
+      }
+      // 建立新帳號
+      users[user] = { password: pass, createdAt: new Date().toISOString() };
+      saveUsers(users);
+      // 初始化該帳號的資料
+      saveUserData(user, getDefaultData());
+      showSuccess('註冊成功！正在為您登入…');
+      setTimeout(() => {
+        setSession(user);
+        enterApp(user);
+      }, 800);
     } else {
-      loginErrorText.textContent = '帳號或密碼錯誤，請重新輸入。';
-      loginError.classList.add('show');
-      passwordInput.value = '';
-      passwordInput.focus();
+      // 登入模式
+      if (!users[user]) {
+        showError('此帳號不存在，請先註冊。');
+        return;
+      }
+      if (users[user].password !== pass) {
+        showError('密碼錯誤，請重新輸入。');
+        passwordInput.value = '';
+        passwordInput.focus();
+        return;
+      }
+      setSession(user);
+      enterApp(user);
     }
   });
 
-  // 按 Enter 也可登入
   passwordInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') loginBtn.click();
+    if (e.key === 'Enter') authBtn.click();
   });
   usernameInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') passwordInput.focus();
   });
+  confirmPasswordInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') authBtn.click();
+  });
 
   logoutBtn.addEventListener('click', () => {
-    localStorage.removeItem(AUTH_KEY);
-    showLogin();
+    clearSession();
+    appScreen.classList.remove('active');
+    loginScreen.style.display = 'flex';
+    usernameInput.value = '';
+    passwordInput.value = '';
+    confirmPasswordInput.value = '';
+    switchMode(false);
+    window.__dashboardInitialized = false;
   });
 
   // ============================================================
-  // 儀表板邏輯 (原本的功能)
+  // 主畫面邏輯
+  // ============================================================
+  let currentUser = null;
+  let appData = null;
+
+  function enterApp(username) {
+    currentUser = username;
+    loginScreen.style.display = 'none';
+    appScreen.classList.add('active');
+    // 載入該帳號的資料
+    let data = loadUserData(username);
+    if (!data) {
+      data = getDefaultData();
+      saveUserData(username, data);
+    }
+    appData = data;
+    // 初始化儀表板
+    initDashboard();
+  }
+
+  function persistData() {
+    if (currentUser && appData) {
+      saveUserData(currentUser, appData);
+      // 顯示已儲存提示
+      const status = document.getElementById('saveStatus');
+      if (status) {
+        status.classList.add('show');
+        clearTimeout(window.__saveTimer);
+        window.__saveTimer = setTimeout(() => {
+          status.classList.remove('show');
+        }, 1500);
+      }
+    }
+  }
+
+  // ============================================================
+  // 儀表板邏輯
   // ============================================================
   function initDashboard() {
-    const banksData = [
-      { 
-        name: 'BNU', icon: 'fa-building-columns', region: 'mo',
-        balanceMop: 2500, balanceHkd: 8096, balanceCny: 0, balanceJpy: 417230,
-        mopAmount: 7000, mopTime: '每月20交,公用戶5000+蘭2000',
-        hkdAmount: 8100, hkdTime: '每月1日交,橫琴供款2000+車位賃6100',
-        creditCardAmount: '', creditCardDay: '1'
-      },
-      { 
-        name: 'HSBC', icon: 'fa-building-columns', region: 'mo',
-        balanceMop: 17718, balanceHkd: 0, balanceCny: 0, balanceJpy: 0,
-        mopAmount: 15800, mopTime: '每個月1日交,房賃',
-        hkdAmount: 0, hkdTime: '',
-        creditCardAmount: '', creditCardDay: '1'
-      },
-      { 
-        name: 'ICBC', icon: 'fa-building-columns', region: 'mo',
-        balanceMop: 10335, balanceHkd: 50, balanceCny: 13570, balanceJpy: 0,
-        mopAmount: 6300, mopTime: '每個月1日交,車賃',
-        hkdAmount: 0, hkdTime: '',
-        creditCardAmount: '3820', creditCardDay: '1'
-      },
-      { 
-        name: 'BOC', icon: 'fa-building-columns', region: 'mo',
-        balanceMop: 16690, balanceHkd: 4459, balanceCny: 1000, balanceJpy: 0,
-        mopAmount: 0, mopTime: '',
-        hkdAmount: 1020, hkdTime: '可以供可以唔供的基金',
-        creditCardAmount: '12342', creditCardDay: '1'
-      },
-      { 
-        name: '大豐(Mpay)', icon: 'fa-mobile-screen', region: 'mo',
-        balanceMop: 8975, balanceHkd: 0, balanceCny: 0, balanceJpy: 0,
-        mopAmount: 8000, mopTime: '每月1日交,日常使用',
-        hkdAmount: 0, hkdTime: '',
-        creditCardAmount: '', creditCardDay: '1'
-      },
-      { 
-        name: 'BOC(內地)', icon: 'fa-building-columns', region: 'cn',
-        balanceMop: 0, balanceHkd: 0, balanceCny: 15245.25, balanceJpy: 0,
-        mopAmount: 0, mopTime: '',
-        hkdAmount: 0, hkdTime: '',
-        creditCardAmount: '', creditCardDay: '1'
-      },
-      { 
-        name: 'ICBC(內地)', icon: 'fa-building-columns', region: 'cn',
-        balanceMop: 0, balanceHkd: 0, balanceCny: 1456.43, balanceJpy: 0,
-        mopAmount: 0, mopTime: '',
-        hkdAmount: 0, hkdTime: '',
-        creditCardAmount: '', creditCardDay: '1'
-      },
-      { 
-        name: '支付寶', icon: 'fa-mobile-screen', region: 'cn',
-        balanceMop: 0, balanceHkd: 0, balanceCny: 957, balanceJpy: 0,
-        mopAmount: 0, mopTime: '',
-        hkdAmount: 0, hkdTime: '',
-        creditCardAmount: '', creditCardDay: '1'
-      },
-      { 
-        name: '微信支付', icon: 'fa-mobile-screen', region: 'cn',
-        balanceMop: 0, balanceHkd: 0, balanceCny: 9321, balanceJpy: 0,
-        mopAmount: 0, mopTime: '',
-        hkdAmount: 0, hkdTime: '',
-        creditCardAmount: '', creditCardDay: '1'
-      }
-    ];
-
-    const insuranceEvents = [
-      { month: 7, day: 10, amount: 38000, desc: '保險 7月' },
-      { month: 8, day: 10, amount: 22000, desc: '保險 8月' },
-      { month: 9, day: 10, amount: 17100, desc: '保險 9月' },
-      { month: 9, day: 22, amount: 51000, desc: '保險 9月(原10月)' }
-    ];
-
-    const otherMonthlyExpense = 500 + 200 + 645;
-    const SALARY_DAY = 15;
-    const SALARY_NORMAL = 66000;
-    const SALARY_DOUBLE = 126000;
+    // 從 appData 取得資料
+    const banksData = appData.banksData;
+    const insuranceEvents = appData.insuranceEvents;
+    const otherMonthlyExpense = appData.otherMonthlyExpense;
+    const SALARY_DAY = appData.salaryDay;
+    const SALARY_NORMAL = appData.salaryNormal;
+    const SALARY_DOUBLE = appData.salaryDouble;
     const FORECAST_MONTHS = 6;
+
+    // 更新保險與其他開支的顯示文字
+    const insuranceEl = document.getElementById('insuranceDetail');
+    const otherEl = document.getElementById('otherExpenses');
+    if (insuranceEl) insuranceEl.textContent = appData.insuranceDetail;
+    if (otherEl) otherEl.textContent = appData.otherExpenses;
+
+    // 監聽這兩個 contenteditable 的變更
+    if (insuranceEl) {
+      insuranceEl.addEventListener('input', () => {
+        appData.insuranceDetail = insuranceEl.textContent;
+        persistData();
+      });
+    }
+    if (otherEl) {
+      otherEl.addEventListener('input', () => {
+        appData.otherExpenses = otherEl.textContent;
+        persistData();
+      });
+    }
 
     function parseNumber(val) {
       if (typeof val === 'number') return val;
@@ -1376,6 +1621,7 @@
       else if (currency === 'hkd') banksData[idx].balanceHkd = val;
       else if (currency === 'cny') banksData[idx].balanceCny = val;
       else if (currency === 'jpy') banksData[idx].balanceJpy = val;
+      persistData();
       renderAll();
     }
 
@@ -1386,6 +1632,7 @@
       const idx = parseInt(bankIndex, 10);
       if (isNaN(idx) || !banksData[idx]) return;
       banksData[idx].creditCardAmount = input.value.trim();
+      persistData();
       renderAll();
     }
 
@@ -1402,6 +1649,7 @@
         banksData[idx].creditCardDay = '1';
         input.value = '1';
       }
+      persistData();
       renderAll();
     }
 
@@ -1431,9 +1679,18 @@
   }
 
   // ============================================================
-  // 啟動：檢查登入狀態
+  // 啟動：檢查是否已登入
   // ============================================================
-  checkAuth();
+  (function boot() {
+    const session = getSession();
+    if (session && getUsers()[session]) {
+      enterApp(session);
+    } else {
+      clearSession();
+      loginScreen.style.display = 'flex';
+      appScreen.classList.remove('active');
+    }
+  })();
 </script>
 </body>
 </html>
