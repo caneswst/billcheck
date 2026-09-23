@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canes個人開支管理 · 存款提醒</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', 'Segoe UI', '微軟正黑體', sans-serif;
+    }
+    body {
+      background: #f5f7fb;
+      padding: 24px 20px 40px;
+      color: #1e293b;
+    }
+    .dashboard {
+      max-width: 1500px;
+      margin: 0 auto;
+    }
+
+    /* 頂部 */
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      gap: 20px;
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #0f172a;
+    }
+    .header h1 i { color: #3b82f6; }
+    .total-balance-card {
+      background: white;
+      border-radius: 24px;
+      padding: 14px 26px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.02);
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+      border: 1px solid #e9eef4;
+    }
+    .total-item { display: flex; flex-direction: column; }
+    .total-item .label { font-size: 13px; color: #64748b; margin-bottom: 4px; }
+    .total-item .value { font-size: 22px; font-weight: 700; color: #0f172a; }
+    .total-item .value small { font-size: 14px; font-weight: 500; color: #475569; margin-left: 4px; }
+
+    /* 工具列 */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      background: white;
+      padding: 14px 22px;
+      border-radius: 20px;
+      border: 1px solid #edf2f7;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.02);
+    }
+    .toolbar label {
+      font-weight: 600;
+      font-size: 14px;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .toolbar input[type="date"] {
+      padding: 8px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      color: #0f172a;
+    }
+    .toolbar button {
+      padding: 8px 18px;
+      border: none;
+      border-radius: 40px;
+      background: #3b82f6;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.1s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: inherit;
+    }
+    .toolbar button:hover { background: #2563eb; }
+    .toolbar button.secondary {
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #e2e8f0;
+    }
+    .toolbar button.secondary:hover { background: #e2e8f0; }
+
+    /* 存款提醒總覽橫幅 */
+    .deposit-banner {
+      border-radius: 18px;
+      padding: 18px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      font-size: 14px;
+      line-height: 1.6;
+      border: 2px solid transparent;
+    }
+    .deposit-banner.green {
+      background: #f0fdf4;
+      border-color: #86efac;
+      color: #166534;
+    }
+    .deposit-banner.yellow {
+      background: #fffbeb;
+      border-color: #fde68a;
+      color: #92400e;
+    }
+    .deposit-banner.red {
+      background: #fef2f2;
+      border-color: #fca5a5;
+      color: #991b1b;
+    }
+    .deposit-banner i { font-size: 24px; margin-top: 2px; flex-shrink: 0; }
+    .deposit-banner .content { flex: 1; }
+    .deposit-banner .content strong { font-weight: 700; font-size: 16px; display: block; margin-bottom: 8px; }
+    .deposit-banner .content ul { margin: 0 0 0 20px; }
+    .deposit-banner .content li { margin-bottom: 6px; }
+    .deposit-banner .content li:last-child { margin-bottom: 0; }
+    .deposit-banner .highlight {
+      background: #fef08a;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      color: #78350f;
+    }
+
+    /* 銀行卡片 */
+    .bank-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 22px;
+      margin-bottom: 28px;
+    }
+    .bank-card {
+      background: white;
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.02);
+      border: 1px solid #edf2f7;
+      transition: 0.15s;
+      display: flex;
+      flex-direction: column;
+    }
+    .bank-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08);
+    }
+    .bank-card.short-card {
+      border: 2px solid #ef4444;
+      background: #fffbfb;
+    }
+    .bank-card.cn-card {
+      border-left: 4px solid #ef4444;
+    }
+    .bank-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .bank-name {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .bank-name i { font-size: 22px; color: #3b82f6; }
+    .bank-name.cn i { color: #ef4444; }
+    .bank-status {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 40px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .bank-status.ok { background: #dcfce7; color: #166534; }
+    .bank-status.low { background: #fef3c7; color: #92400e; }
+    .bank-status.short { background: #fee2e2; color: #991b1b; }
+
+    .balance-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      background: #f8fafc;
+      border-radius: 16px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+    }
+    .balance-item { display: flex; flex-direction: column; min-width: 85px; }
+    .balance-item .currency {
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+    .balance-item .amount { display: flex; align-items: center; gap: 4px; }
+    .editable {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 4px 6px;
+      font-weight: 600;
+      font-size: 16px;
+      color: #0b1e33;
+      width: 100%;
+      max-width: 120px;
+      transition: 0.1s;
+      font-family: inherit;
+    }
+    .editable:hover, .editable:focus {
+      background: white;
+      border-color: #94a3b8;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+    }
+
+    /* 存款提醒卡片內 */
+    .deposit-alert {
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      border-radius: 14px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .deposit-alert i { color: #dc2626; font-size: 18px; margin-top: 2px; }
+    .deposit-alert .text { flex: 1; font-size: 13px; line-height: 1.5; color: #991b1b; }
+    .deposit-alert .text strong { font-weight: 700; }
+    .deposit-alert .text .amount {
+      background: #fecaca;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      color: #7f1d1d;
+      display: inline-block;
+      margin-top: 4px;
+    }
+
+    /* 支出項目列表 */
+    .expense-section {
+      margin-top: 10px;
+      border-top: 1px solid #eef2f6;
+      padding-top: 14px;
+    }
+    .expense-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .expense-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 280px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .expense-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 13px;
+      border-left: 3px solid transparent;
+    }
+    .expense-item.insufficient-row {
+      background: #fef2f2;
+      border-left-color: #ef4444;
+    }
+    .expense-item .info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
+    }
+    .expense-item .date-badge {
+      font-size: 11px;
+      font-weight: 700;
+      color: #3b82f6;
+      background: #e0edff;
+      padding: 2px 8px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+    .expense-item .date-badge.insurance {
+      color: #7c3aed;
+      background: #ede9fe;
+    }
+    .expense-item .date-badge.other {
+      color: #b45309;
+      background: #fef3c7;
+    }
+    .expense-item .date-badge.salary {
+      color: #16a34a;
+      background: #dcfce7;
+    }
+    .expense-item .date-badge.creditcard {
+      color: #c2410c;
+      background: #ffedd5;
+    }
+    .expense-item .name {
+      font-weight: 600;
+      color: #0f172a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .expense-item .desc {
+      color: #64748b;
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-left: 4px;
+    }
+    .expense-item .amt {
+      font-weight: 700;
+      color: #0f172a;
+      white-space: nowrap;
+      margin-left: 8px;
+    }
+    .expense-item .amt.neg { color: #dc2626; }
+    .expense-item .amt.pos { color: #16a34a; }
+    .expense-item .badge-short {
+      font-size: 10px;
+      background: #ef4444;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 700;
+      margin-left: 6px;
+      white-space: nowrap;
+    }
+
+    /* 保險 & 其他開支 */
+    .extra-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      margin-bottom: 28px;
+    }
+    .extra-card {
+      background: white;
+      border-radius: 22px;
+      padding: 20px 22px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.02);
+      border: 1px solid #edf2f7;
+    }
+    .extra-card h3 {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #0f172a;
+    }
+    .extra-card h3 i { color: #3b82f6; }
+    .extra-item {
+      background: #f8fafc;
+      border-radius: 14px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .extra-item .icon {
+      width: 32px;
+      height: 32px;
+      background: #e6edf6;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #2563eb;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .extra-content { flex: 1; }
+    .extra-content .title {
+      font-weight: 600;
+      font-size: 15px;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+    .extra-content .desc {
+      font-size: 14px;
+      color: #334155;
+      line-height: 1.5;
+      background: white;
+      border-radius: 8px;
+      padding: 6px 10px;
+      border: 1px solid #e2e8f0;
+    }
+    .extra-note {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* 響應式 */
+    @media (max-width: 700px) {
+      .extra-section { grid-template-columns: 1fr; }
+      .header { flex-direction: column; align-items: flex-start; }
+      .total-balance-card { width: 100%; gap: 20px; }
+      .bank-grid { grid-template-columns: 1fr; }
+      .toolbar { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+<div class="dashboard">
+  <!-- 頂部 -->
+  <div class="header">
+    <h1><i class="fas fa-wallet"></i> 澳門個人開支管理</h1>
+    <div class="total-balance-card">
+      <div class="total-item">
+        <span class="label">總餘額 (澳門幣)</span>
+        <span class="value" id="totalMop">0 <small>MOP</small></span>
+      </div>
+      <div class="total-item">
+        <span class="label">總餘額 (港幣)</span>
+        <span class="value" id="totalHkd">0 <small>HKD</small></span>
+      </div>
+      <div class="total-item">
+        <span class="label">總餘額 (人民幣)</span>
+        <span class="value" id="totalCny">0 <small>CNY</small></span>
+      </div>
+      <div class="total-item">
+        <span class="label">總餘額 (日元)</span>
+        <span class="value" id="totalJpy">0 <small>JPY</small></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 工具列 -->
+  <div class="toolbar">
+    <label><i class="fas fa-calendar-day"></i> 檢查日期：</label>
+    <input type="date" id="checkDate">
+    <button id="btnCheckToday"><i class="fas fa-search"></i> 檢查今日</button>
+    <button id="btnCheckNext30" class="secondary"><i class="fas fa-calendar-week"></i> 檢查未來 30 日</button>
+    <span style="flex:1;"></span>
+    <span style="font-size:13px; color:#64748b;"><i class="fas fa-info-circle"></i> 存款提醒只顯示真正不足的第一個月份</span>
+  </div>
+
+  <!-- 存款提醒總覽 -->
+  <div id="depositBanner" class="deposit-banner green">
+    <i class="fas fa-check-circle"></i>
+    <div class="content" id="depositBannerContent">
+      <strong>一切正常</strong>
+      所有銀行在未來 6 個月內都有足夠餘額支付支出。
+    </div>
+  </div>
+
+  <!-- 銀行卡片 -->
+  <div class="bank-grid" id="bankGrid"></div>
+
+  <!-- 保險 & 其他開支 -->
+  <div class="extra-section">
+    <div class="extra-card">
+      <h3><i class="fas fa-shield-alt"></i> 保險支出</h3>
+      <div class="extra-item">
+        <div class="icon"><i class="fas fa-calendar-check"></i></div>
+        <div class="extra-content">
+          <div class="title">年度保險繳費</div>
+          <div class="desc" contenteditable="true" id="insuranceDetail">
+            每年7月10日交38000,8月10日交22000,9月10日交17100,9月22日交51000
+          </div>
+        </div>
+      </div>
+      <div class="extra-note"><i class="fas fa-arrow-right"></i> 自動從 BOC 扣款</div>
+    </div>
+    <div class="extra-card">
+      <h3><i class="fas fa-file-invoice"></i> 其他開支</h3>
+      <div class="extra-item">
+        <div class="icon"><i class="fas fa-tint"></i></div>
+        <div class="extra-content">
+          <div class="title">水費 · 電費 · 管理費</div>
+          <div class="desc" contenteditable="true" id="otherExpenses">
+            水費每月約500、電費每月約200、管理費645
+          </div>
+        </div>
+      </div>
+      <div class="extra-note"><i class="fas fa-arrow-right"></i> 自動從 BOC 扣款</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // ========== 原始資料 ==========
+    const banksData = [
+      { 
+        name: 'BNU', icon: 'fa-building-columns', region: 'mo',
+        balanceMop: 2500, balanceHkd: 8096, balanceCny: 0, balanceJpy: 417230,
+        mopAmount: 7000, mopTime: '每月20交,公用戶5000+蘭2000',
+        hkdAmount: 8100, hkdTime: '每月1日交,橫琴供款2000+車位賃6100',
+        creditCardAmount: '', creditCardDay: '1'
+      },
+      { 
+        name: 'HSBC', icon: 'fa-building-columns', region: 'mo',
+        balanceMop: 17718, balanceHkd: 0, balanceCny: 0, balanceJpy: 0,
+        mopAmount: 15800, mopTime: '每個月1日交,房賃',
+        hkdAmount: 0, hkdTime: '',
+        creditCardAmount: '', creditCardDay: '1'
+      },
+      { 
+        name: 'ICBC', icon: 'fa-building-columns', region: 'mo',
+        balanceMop: 10335, balanceHkd: 50, balanceCny: 13570, balanceJpy: 0,
+        mopAmount: 6300, mopTime: '每個月1日交,車賃',
+        hkdAmount: 0, hkdTime: '',
+        creditCardAmount: '3820', creditCardDay: '1'
+      },
+      { 
+        name: 'BOC', icon: 'fa-building-columns', region: 'mo',
+        balanceMop: 16690, balanceHkd: 4459, balanceCny: 1000, balanceJpy: 0,
+        mopAmount: 0, mopTime: '',
+        hkdAmount: 1020, hkdTime: '可以供可以唔供的基金',
+        creditCardAmount: '12342', creditCardDay: '1'
+      },
+      { 
+        name: '大豐(Mpay)', icon: 'fa-mobile-screen', region: 'mo',
+        balanceMop: 8975, balanceHkd: 0, balanceCny: 0, balanceJpy: 0,
+        mopAmount: 8000, mopTime: '每月1日交,日常使用',
+        hkdAmount: 0, hkdTime: '',
+        creditCardAmount: '', creditCardDay: '1'
+      },
+      // ===== 內地帳戶 (人民幣) =====
+      { 
+        name: 'BOC(內地)', icon: 'fa-building-columns', region: 'cn',
+        balanceMop: 0, balanceHkd: 0, balanceCny: 15245.25, balanceJpy: 0,
+        mopAmount: 0, mopTime: '',
+        hkdAmount: 0, hkdTime: '',
+        creditCardAmount: '', creditCardDay: '1'
+      },
+      { 
+        name: 'ICBC(內地)', icon: 'fa-building-columns', region: 'cn',
+        balanceMop: 0, balanceHkd: 0, balanceCny: 1456.43, balanceJpy: 0,
+        mopAmount: 0, mopTime: '',
+        hkdAmount: 0, hkdTime: '',
+        creditCardAmount: '', creditCardDay: '1'
+      },
+      { 
+        name: '支付寶', icon: 'fa-mobile-screen', region: 'cn',
+        balanceMop: 0, balanceHkd: 0, balanceCny: 957, balanceJpy: 0,
+        mopAmount: 0, mopTime: '',
+        hkdAmount: 0, hkdTime: '',
+        creditCardAmount: '', creditCardDay: '1'
+      },
+      { 
+        name: '微信支付', icon: 'fa-mobile-screen', region: 'cn',
+        balanceMop: 0, balanceHkd: 0, balanceCny: 9321, balanceJpy: 0,
+        mopAmount: 0, mopTime: '',
+        hkdAmount: 0, hkdTime: '',
+        creditCardAmount: '', creditCardDay: '1'
+      }
+    ];
+
+    // ========== 保險事件 ==========
+    const insuranceEvents = [
+      { month: 7, day: 10, amount: 38000, desc: '保險 7月' },
+      { month: 8, day: 10, amount: 22000, desc: '保險 8月' },
+      { month: 9, day: 10, amount: 17100, desc: '保險 9月' },
+      { month: 9, day: 22, amount: 51000, desc: '保險 9月(原10月)' }
+    ];
+
+    // ========== 其他開支 (已修正：水費 500) ==========
+    const otherMonthlyExpense = 500 + 200 + 645; // 水費 500 + 電費 200 + 管理費 645 = 1345
+
+    const SALARY_DAY = 15;
+    const SALARY_NORMAL = 66000;
+    const SALARY_DOUBLE = 126000;
+    const FORECAST_MONTHS = 6;
+
+    // ========== 輔助函數 ==========
+    function parseNumber(val) {
+      if (typeof val === 'number') return val;
+      if (!val) return 0;
+      const cleaned = String(val).replace(/[^0-9.-]/g, '');
+      const num = parseFloat(cleaned);
+      return isNaN(num) ? 0 : num;
+    }
+
+    function formatNumber(num) {
+      return Number(num).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    }
+
+    function getSalaryForDate(date) {
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+      if (day === SALARY_DAY) {
+        if (month === 7 || month === 11) return SALARY_DOUBLE;
+        return SALARY_NORMAL;
+      }
+      return 0;
+    }
+
+    function getInsuranceForDate(date) {
+      let total = 0;
+      insuranceEvents.forEach(ev => {
+        if (date.getMonth() + 1 === ev.month && date.getDate() === ev.day) {
+          total += ev.amount;
+        }
+      });
+      return total;
+    }
+
+    function getOtherExpenseForDate(date) {
+      if (date.getDate() === 1) return otherMonthlyExpense;
+      return 0;
+    }
+
+    function getBankExpenseForDate(bank, date) {
+      const day = date.getDate();
+      let mop = 0, hkd = 0, creditCard = 0;
+
+      const mopTime = bank.mopTime || '';
+      const hkdTime = bank.hkdTime || '';
+
+      if (mopTime.includes('每月20交') || mopTime.includes('每月20')) {
+        if (day === 20) mop += parseNumber(bank.mopAmount);
+      } else if (mopTime.includes('每個月1日交') || mopTime.includes('每月1日交')) {
+        if (day === 1) mop += parseNumber(bank.mopAmount);
+      } else if (mopTime.trim() !== '' && !mopTime.includes('日常使用')) {
+        const match = mopTime.match(/每月(\d+)日?/);
+        if (match) {
+          const targetDay = parseInt(match[1], 10);
+          if (day === targetDay) mop += parseNumber(bank.mopAmount);
+        }
+      }
+
+      if (hkdTime.includes('每月1日交') || hkdTime.includes('每個月1日交')) {
+        if (day === 1) hkd += parseNumber(bank.hkdAmount);
+      } else if (hkdTime.includes('每月20交')) {
+        if (day === 20) hkd += parseNumber(bank.hkdAmount);
+      } else if (hkdTime.trim() !== '') {
+        const match = hkdTime.match(/每月(\d+)日?/);
+        if (match) {
+          const targetDay = parseInt(match[1], 10);
+          if (day === targetDay) hkd += parseNumber(bank.hkdAmount);
+        }
+      }
+
+      const ccAmount = parseNumber(bank.creditCardAmount);
+      if (ccAmount > 0) {
+        const ccDay = parseInt(bank.creditCardDay, 10) || 1;
+        if (day === ccDay) creditCard += ccAmount;
+      }
+
+      return { mop, hkd, creditCard };
+    }
+
+    // ========== 取得所有支出項目 (用於顯示) ==========
+    function getAllExpenseItems() {
+      const items = [];
+      const today = new Date();
+      today.setHours(0,0,0,0);
+
+      const startDate = new Date(today);
+      startDate.setDate(1);
+      for (let m = 0; m < 12; m++) {
+        const year = startDate.getFullYear();
+        const month = startDate.getMonth() + m;
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        for (let d = 1; d <= daysInMonth; d++) {
+          const date = new Date(year, month, d);
+          if (date < today) continue;
+
+          banksData.forEach(bank => {
+            if (bank.region === 'cn') return;
+            
+            const expense = getBankExpenseForDate(bank, date);
+            if (expense.mop > 0) {
+              items.push({
+                date: new Date(date), dateStr: `${date.getMonth()+1}/${date.getDate()}`,
+                bank: bank.name, type: 'mop', amount: expense.mop, currency: 'MOP',
+                desc: bank.mopTime || '澳門幣支出', category: 'bank'
+              });
+            }
+            if (expense.hkd > 0) {
+              items.push({
+                date: new Date(date), dateStr: `${date.getMonth()+1}/${date.getDate()}`,
+                bank: bank.name, type: 'hkd', amount: expense.hkd, currency: 'HKD',
+                desc: bank.hkdTime || '港幣支出', category: 'bank'
+              });
+            }
+            if (expense.creditCard > 0) {
+              items.push({
+                date: new Date(date), dateStr: `${date.getMonth()+1}/${date.getDate()}`,
+                bank: bank.name, type: 'creditCard', amount: expense.creditCard, currency: 'MOP',
+                desc: `信用卡還款 (每月${bank.creditCardDay || '1'}日)`, category: 'creditcard'
+              });
+            }
+          });
+
+          // 保險
+          const insuranceAmt = getInsuranceForDate(date);
+          if (insuranceAmt > 0) {
+            insuranceEvents.forEach(ev => {
+              if (date.getMonth()+1 === ev.month && date.getDate() === ev.day) {
+                items.push({
+                  date: new Date(date), dateStr: `${date.getMonth()+1}/${date.getDate()}`,
+                  bank: 'BOC', type: 'insurance', amount: ev.amount, currency: 'MOP',
+                  desc: ev.desc, category: 'insurance'
+                });
+              }
+            });
+          }
+
+          // 其他開支
+          if (date.getDate() === 1) {
+            items.push({
+              date: new Date(date), dateStr: `${date.getMonth()+1}/${date.getDate()}`,
+              bank: 'BOC', type: 'other', amount: otherMonthlyExpense, currency: 'MOP',
+              desc: '水費+電費+管理費', category: 'other'
+            });
+          }
+
+          // 薪資收入
+          if (date.getDate() === SALARY_DAY) {
+            const salary = getSalaryForDate(date);
+            if (salary > 0) {
+              items.push({
+                date: new Date(date), dateStr: `${date.getMonth()+1}/${date.getDate()}`,
+                bank: 'BOC', type: 'salary', amount: salary, currency: 'MOP',
+                desc: (date.getMonth()+1 === 7 || date.getMonth()+1 === 11) ? '薪資 (雙糧)' : '薪資',
+                category: 'salary', isIncome: true
+              });
+            }
+          }
+        }
+      }
+      items.sort((a, b) => a.date - b.date);
+      return items;
+    }
+
+    // ========== 核心：逐月模擬，只回傳「第一個真正不足的月份」 ==========
+    function findFirstShortfall(bank) {
+      let balance = parseNumber(bank.balanceMop);
+      const today = new Date();
+      today.setHours(0,0,0,0);
+
+      for (let m = 0; m < FORECAST_MONTHS; m++) {
+        const checkMonth = new Date(today.getFullYear(), today.getMonth() + m, 1);
+        const year = checkMonth.getFullYear();
+        const month = checkMonth.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        let monthBalance = balance;
+
+        for (let d = 1; d <= daysInMonth; d++) {
+          const date = new Date(year, month, d);
+          if (date < today) continue;
+
+          if (bank.name === 'BOC' && d === SALARY_DAY) {
+            monthBalance += getSalaryForDate(date);
+          }
+
+          if (bank.name === 'BOC') {
+            monthBalance -= getInsuranceForDate(date);
+          }
+
+          if (bank.name === 'BOC' && d === 1) {
+            monthBalance -= otherMonthlyExpense;
+          }
+
+          const expense = getBankExpenseForDate(bank, date);
+          monthBalance -= (expense.mop + expense.creditCard);
+        }
+
+        // 只有當月月底餘額 < 0 才視為不足
+        if (monthBalance < 0) {
+          return {
+            year: year,
+            month: month + 1,
+            monthLabel: `${year}年${month+1}月`,
+            shortfall: Math.abs(monthBalance),
+            balanceBefore: balance
+          };
+        }
+
+        balance = monthBalance;
+      }
+
+      return null;
+    }
+
+    // ========== 產生所有銀行的存款提醒 ==========
+    function generateDepositReminders() {
+      const reminders = [];
+      banksData.forEach(bank => {
+        if (bank.region === 'cn') return;
+        const firstShortfall = findFirstShortfall(bank);
+        if (firstShortfall) {
+          reminders.push({
+            bankName: bank.name,
+            shortfall: firstShortfall
+          });
+        }
+      });
+      return reminders;
+    }
+
+    // ========== 取得該銀行在指定日期的當前餘額 ==========
+    function getBankBalanceAtDate(bank, targetDate) {
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const target = new Date(targetDate);
+      target.setHours(0,0,0,0);
+
+      if (target < today) return parseNumber(bank.balanceMop);
+
+      let balance = parseNumber(bank.balanceMop);
+      const current = new Date(today);
+
+      while (current <= target) {
+        const day = current.getDate();
+
+        if (bank.name === 'BOC' && day === SALARY_DAY) {
+          balance += getSalaryForDate(current);
+        }
+
+        if (bank.name === 'BOC') {
+          balance -= getInsuranceForDate(current);
+        }
+
+        if (bank.name === 'BOC' && day === 1) {
+          balance -= otherMonthlyExpense;
+        }
+
+        const expense = getBankExpenseForDate(bank, current);
+        balance -= (expense.mop + expense.creditCard);
+
+        current.setDate(current.getDate() + 1);
+      }
+
+      return balance;
+    }
+
+    // ========== 更新 UI ==========
+    const bankGrid = document.getElementById('bankGrid');
+    const depositBanner = document.getElementById('depositBanner');
+    const depositBannerContent = document.getElementById('depositBannerContent');
+    const checkDateInput = document.getElementById('checkDate');
+
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    checkDateInput.value = `${yyyy}-${mm}-${dd}`;
+
+    function renderAll() {
+      const targetDateStr = checkDateInput.value;
+      const targetDate = new Date(targetDateStr + 'T00:00:00');
+
+      // 產生存款提醒
+      const reminders = generateDepositReminders();
+
+      // 更新頂部存款提醒橫幅
+      if (reminders.length > 0) {
+        depositBanner.className = 'deposit-banner red';
+        let html = `<strong><i class="fas fa-exclamation-triangle"></i> 存款提醒 — 以下銀行未來會餘額不足</strong><ul>`;
+        reminders.forEach(r => {
+          html += `<li><strong>${r.bankName}</strong>：預計在 <strong>${r.shortfall.monthLabel}</strong> 會不足，需存入 <span class="highlight">${formatNumber(r.shortfall.shortfall)} MOP</span></li>`;
+        });
+        html += `</ul>`;
+        depositBannerContent.innerHTML = html;
+      } else {
+        depositBanner.className = 'deposit-banner green';
+        depositBannerContent.innerHTML = `
+          <strong><i class="fas fa-check-circle"></i> 一切正常</strong>
+          所有銀行在未來 ${FORECAST_MONTHS} 個月內都有足夠餘額支付支出，無需存款。
+        `;
+      }
+
+      // 渲染銀行卡片
+      bankGrid.innerHTML = '';
+
+      banksData.forEach((bank, index) => {
+        const currentBalance = bank.region === 'cn' ? 0 : getBankBalanceAtDate(bank, targetDate);
+        const currentMop = bank.region === 'cn' ? 0 : currentBalance;
+        const currentHkd = bank.region === 'cn' ? 0 : parseNumber(bank.balanceHkd);
+        const currentCny = parseNumber(bank.balanceCny);
+        const currentJpy = parseNumber(bank.balanceJpy);
+
+        const expense = getBankExpenseForDate(bank, targetDate);
+        const mopExpense = expense.mop + expense.creditCard;
+        const hkdExpense = expense.hkd;
+
+        let status = 'ok';
+        let statusText = '充足';
+        let statusIcon = 'fa-check-circle';
+        let isShortCard = false;
+
+        const bankReminder = reminders.find(r => r.bankName === bank.name);
+
+        if (bank.region === 'cn') {
+          status = 'ok';
+          statusText = '正常';
+          statusIcon = 'fa-check-circle';
+        } else {
+          if (mopExpense > 0 && currentMop < mopExpense) {
+            status = 'short'; statusText = '當日不足'; statusIcon = 'fa-exclamation-circle'; isShortCard = true;
+          } else if (bankReminder) {
+            status = 'short'; statusText = '未來不足'; statusIcon = 'fa-exclamation-circle'; isShortCard = true;
+          } else if (mopExpense > 0 && currentMop < mopExpense * 1.2) {
+            status = 'low'; statusText = '偏低'; statusIcon = 'fa-exclamation-triangle';
+          }
+
+          if (hkdExpense > 0 && currentHkd < hkdExpense) {
+            status = 'short'; statusText = '港幣不足'; statusIcon = 'fa-exclamation-circle'; isShortCard = true;
+          }
+        }
+
+        const card = document.createElement('div');
+        card.className = `bank-card ${isShortCard ? 'short-card' : ''} ${bank.region === 'cn' ? 'cn-card' : ''}`;
+
+        let balanceHtml = '';
+        if (bank.region === 'cn') {
+          balanceHtml = `
+            <div class="balance-row">
+              <div class="balance-item">
+                <span class="currency">CNY</span>
+                <div class="amount">
+                  <input type="text" class="editable balance-input" data-bank-index="${index}" data-currency="cny" value="${formatNumber(currentCny)}" placeholder="0">
+                </div>
+              </div>
+            </div>
+          `;
+        } else {
+          balanceHtml = `
+            <div class="balance-row">
+              <div class="balance-item">
+                <span class="currency">MOP</span>
+                <div class="amount">
+                  <input type="text" class="editable balance-input" data-bank-index="${index}" data-currency="mop" value="${formatNumber(currentMop)}" placeholder="0">
+                </div>
+              </div>
+              <div class="balance-item">
+                <span class="currency">HKD</span>
+                <div class="amount">
+                  <input type="text" class="editable balance-input" data-bank-index="${index}" data-currency="hkd" value="${formatNumber(currentHkd)}" placeholder="0">
+                </div>
+              </div>
+              <div class="balance-item">
+                <span class="currency">CNY</span>
+                <div class="amount">
+                  <input type="text" class="editable balance-input" data-bank-index="${index}" data-currency="cny" value="${formatNumber(currentCny)}" placeholder="0">
+                </div>
+              </div>
+              <div class="balance-item">
+                <span class="currency">JPY</span>
+                <div class="amount">
+                  <input type="text" class="editable balance-input" data-bank-index="${index}" data-currency="jpy" value="${formatNumber(currentJpy)}" placeholder="0">
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        // 存款提醒區塊
+        let depositAlertHtml = '';
+        if (bankReminder) {
+          depositAlertHtml = `
+            <div class="deposit-alert">
+              <i class="fas fa-exclamation-circle"></i>
+              <div class="text">
+                <strong>存款提醒：</strong>預計在 <strong>${bankReminder.shortfall.monthLabel}</strong> 餘額不足。<br>
+                建議存入 <span class="amount">${formatNumber(bankReminder.shortfall.shortfall)} MOP</span> 到 ${bank.name}。
+              </div>
+            </div>
+          `;
+        }
+
+        // 信用卡還款區塊
+        const creditCardHtml = bank.region === 'mo' ? `
+          <div style="background:#fefce8; border-radius:14px; padding:12px 14px; margin-bottom:14px; border:1px solid #fde68a;">
+            <div style="font-size:12px; font-weight:700; color:#92400e; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+              <i class="fas fa-credit-card"></i> 信用卡還款設定
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+              <label style="font-size:12px; font-weight:600; color:#78350f; min-width:70px;">還款金額</label>
+              <input type="text" class="cc-amount-input" data-bank-index="${index}" value="${bank.creditCardAmount || ''}" placeholder="0" style="background:white; border:1px solid #fcd34d; border-radius:8px; padding:6px 10px; font-size:14px; font-weight:600; color:#0f172a; font-family:inherit; max-width:130px;">
+              <label style="font-size:12px; font-weight:600; color:#78350f; min-width:70px;">每月還款日</label>
+              <input type="text" class="cc-day-input" data-bank-index="${index}" value="${bank.creditCardDay || '1'}" placeholder="1" style="background:white; border:1px solid #fcd34d; border-radius:8px; padding:6px 10px; font-size:14px; font-weight:600; color:#0f172a; font-family:inherit; max-width:70px;">
+            </div>
+          </div>
+        ` : '';
+
+        // 支出項目列表
+        let expenseHtml = '';
+        if (bank.region === 'mo') {
+          const allItems = getAllExpenseItems();
+          const bankItems = allItems.filter(item => item.bank === bank.name);
+
+          const limitDate = new Date(targetDate);
+          limitDate.setMonth(limitDate.getMonth() + 2);
+          const displayItems = bankItems.filter(item => item.date >= targetDate && item.date <= limitDate);
+          const itemsToShow = displayItems.slice(0, 20);
+
+          expenseHtml = `
+            <div class="expense-section">
+              <div class="expense-title">
+                <i class="fas fa-list-ul"></i> 支出/收入項目 (${itemsToShow.length})
+              </div>
+              <div class="expense-list">
+                ${itemsToShow.length === 0 ? `
+                  <div class="expense-item" style="background:#f1f5f9; color:#64748b;">
+                    <span class="info">暫無項目</span>
+                  </div>
+                ` : itemsToShow.map(item => {
+                  const isInsuff = !item.isIncome && 
+                    ((item.currency === 'MOP' && (item.type === 'mop' || item.type === 'creditCard' || item.type === 'insurance' || item.type === 'other') && currentMop < item.amount) ||
+                     (item.currency === 'HKD' && item.type === 'hkd' && currentHkd < item.amount));
+                  
+                  const dateClass = item.category === 'insurance' ? 'insurance' : 
+                                   item.category === 'other' ? 'other' : 
+                                   item.category === 'salary' ? 'salary' :
+                                   item.category === 'creditcard' ? 'creditcard' : '';
+                  
+                  return `
+                    <div class="expense-item ${isInsuff ? 'insufficient-row' : ''}">
+                      <div class="info">
+                        <span class="date-badge ${dateClass}">${item.dateStr}</span>
+                        <span class="name">${item.bank}</span>
+                        <span class="desc">${item.desc}</span>
+                      </div>
+                      <span class="amt ${item.isIncome ? 'pos' : 'neg'}">
+                        ${item.isIncome ? '+' : '-'}${formatNumber(item.amount)} ${item.currency}
+                      </span>
+                      ${isInsuff ? '<span class="badge-short">不足</span>' : ''}
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        } else {
+          expenseHtml = `
+            <div class="expense-section">
+              <div class="expense-title"><i class="fas fa-info-circle"></i> 人民幣帳戶</div>
+              <div class="expense-list">
+                <div class="expense-item" style="background:#f1f5f9; color:#64748b;">
+                  <span class="info">此帳戶僅顯示餘額，不參與澳門幣支出模擬</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        card.innerHTML = `
+          <div class="bank-header">
+            <div class="bank-name ${bank.region === 'cn' ? 'cn' : ''}">
+              <i class="fas ${bank.icon}"></i>
+              ${bank.name}
+            </div>
+            <div class="bank-status ${status}">
+              <i class="fas ${statusIcon}"></i> ${statusText}
+            </div>
+          </div>
+          ${balanceHtml}
+          ${depositAlertHtml}
+          ${creditCardHtml}
+          ${expenseHtml}
+        `;
+
+        bankGrid.appendChild(card);
+      });
+
+      // 更新總餘額
+      let totalMop = 0, totalHkd = 0, totalCny = 0, totalJpy = 0;
+      banksData.forEach((bank, index) => {
+        if (bank.region === 'cn') {
+          totalCny += parseNumber(bank.balanceCny);
+        } else {
+          totalMop += getBankBalanceAtDate(bank, targetDate);
+          totalHkd += parseNumber(bank.balanceHkd);
+          totalCny += parseNumber(bank.balanceCny);
+          totalJpy += parseNumber(bank.balanceJpy);
+        }
+      });
+
+      document.getElementById('totalMop').innerHTML = formatNumber(totalMop) + ' <small>MOP</small>';
+      document.getElementById('totalHkd').innerHTML = formatNumber(totalHkd) + ' <small>HKD</small>';
+      document.getElementById('totalCny').innerHTML = formatNumber(totalCny) + ' <small>CNY</small>';
+      document.getElementById('totalJpy').innerHTML = formatNumber(totalJpy) + ' <small>JPY</small>';
+
+      attachInputListeners();
+    }
+
+    function attachInputListeners() {
+      document.querySelectorAll('.balance-input').forEach(input => {
+        input.removeEventListener('change', handleBalanceChange);
+        input.addEventListener('change', handleBalanceChange);
+      });
+      document.querySelectorAll('.cc-amount-input').forEach(input => {
+        input.removeEventListener('change', handleCreditCardChange);
+        input.addEventListener('change', handleCreditCardChange);
+      });
+      document.querySelectorAll('.cc-day-input').forEach(input => {
+        input.removeEventListener('change', handleCreditCardDayChange);
+        input.addEventListener('change', handleCreditCardDayChange);
+      });
+    }
+
+    function handleBalanceChange(e) {
+      const input = e.target;
+      const bankIndex = input.dataset.bankIndex;
+      const currency = input.dataset.currency;
+      if (bankIndex === undefined || !currency) return;
+      const idx = parseInt(bankIndex, 10);
+      if (isNaN(idx) || !banksData[idx]) return;
+      const val = parseNumber(input.value);
+      if (currency === 'mop') banksData[idx].balanceMop = val;
+      else if (currency === 'hkd') banksData[idx].balanceHkd = val;
+      else if (currency === 'cny') banksData[idx].balanceCny = val;
+      else if (currency === 'jpy') banksData[idx].balanceJpy = val;
+      renderAll();
+    }
+
+    function handleCreditCardChange(e) {
+      const input = e.target;
+      const bankIndex = input.dataset.bankIndex;
+      if (bankIndex === undefined) return;
+      const idx = parseInt(bankIndex, 10);
+      if (isNaN(idx) || !banksData[idx]) return;
+      banksData[idx].creditCardAmount = input.value.trim();
+      renderAll();
+    }
+
+    function handleCreditCardDayChange(e) {
+      const input = e.target;
+      const bankIndex = input.dataset.bankIndex;
+      if (bankIndex === undefined) return;
+      const idx = parseInt(bankIndex, 10);
+      if (isNaN(idx) || !banksData[idx]) return;
+      const day = parseInt(input.value.trim(), 10);
+      if (!isNaN(day) && day >= 1 && day <= 31) {
+        banksData[idx].creditCardDay = String(day);
+      } else {
+        banksData[idx].creditCardDay = '1';
+        input.value = '1';
+      }
+      renderAll();
+    }
+
+    // ========== 事件綁定 ==========
+    document.getElementById('btnCheckToday').addEventListener('click', () => {
+      const today = new Date();
+      checkDateInput.value = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+      renderAll();
+    });
+
+    document.getElementById('btnCheckNext30').addEventListener('click', () => {
+      const future = new Date();
+      future.setDate(future.getDate() + 30);
+      checkDateInput.value = `${future.getFullYear()}-${String(future.getMonth()+1).padStart(2,'0')}-${String(future.getDate()).padStart(2,'0')}`;
+      renderAll();
+    });
+
+    checkDateInput.addEventListener('change', renderAll);
+    renderAll();
+
+    document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+      el.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+        document.execCommand('insertText', false, text);
+      });
+    });
+
+  })();
+</script>
+</body>
+</html>
