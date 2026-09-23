@@ -2,8 +2,8 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Canes個人開支管理 · 登入</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Canes個人開支管理</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
   <style>
@@ -16,6 +16,7 @@
     body {
       background: #f5f7fb;
       color: #1e293b;
+      -webkit-tap-highlight-color: transparent;
     }
 
     /* ===== 登入畫面 ===== */
@@ -24,7 +25,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 24px;
+      padding: 20px;
       background: linear-gradient(135deg, #eef2ff 0%, #f5f7fb 100%);
     }
     .login-card {
@@ -619,6 +620,7 @@
       border-radius: 8px;
       padding: 6px 10px;
       border: 1px solid #e2e8f0;
+      word-break: break-word;
     }
     .extra-note {
       font-size: 12px;
@@ -629,13 +631,39 @@
       gap: 6px;
     }
 
+    /* ===== 手機版專用調整 ===== */
     @media (max-width: 700px) {
       .extra-section { grid-template-columns: 1fr; }
-      .header { flex-direction: column; align-items: flex-start; padding-right: 0; }
-      .total-balance-card { width: 100%; gap: 20px; }
+      .header { flex-direction: column; align-items: flex-start; padding-right: 0; gap: 12px; }
+      .total-balance-card { width: 100%; gap: 16px 20px; padding: 14px 18px; }
+      .total-item .value { font-size: 18px; }
       .bank-grid { grid-template-columns: 1fr; }
-      .toolbar { flex-direction: column; align-items: stretch; }
+      .toolbar { flex-direction: column; align-items: stretch; padding: 14px 16px; }
+      .toolbar label { justify-content: space-between; }
+      .toolbar input[type="date"] { width: 100%; }
+      .toolbar button { justify-content: center; }
+      .toolbar .save-status { align-self: flex-end; }
       .logout-btn { top: 14px; right: 14px; padding: 6px 12px; font-size: 12px; }
+      .app-screen { padding: 18px 14px 32px; }
+      .header h1 { font-size: 22px; }
+      .bank-card { padding: 16px; }
+      .bank-name { font-size: 16px; }
+      .balance-item { min-width: 70px; }
+      .editable { font-size: 15px; max-width: 100%; }
+      .expense-item { flex-wrap: wrap; gap: 4px; }
+      .expense-item .info { flex-wrap: wrap; }
+      .expense-item .amt { margin-left: auto; }
+      .extra-card { padding: 16px; }
+      .deposit-banner { padding: 14px 16px; font-size: 13px; }
+      .deposit-banner i { font-size: 20px; }
+    }
+
+    @media (max-width: 380px) {
+      .login-card { padding: 28px 20px; }
+      .total-balance-card { flex-direction: column; gap: 10px; }
+      .balance-row { flex-direction: column; align-items: flex-start; }
+      .balance-item { min-width: 100%; }
+      .editable { max-width: 100%; }
     }
   </style>
 </head>
