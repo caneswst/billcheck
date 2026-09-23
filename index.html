@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Canes個人開支管理 · 存款提醒</title>
+  <title>Canes個人開支管理</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
   <style>
@@ -15,15 +15,153 @@
     }
     body {
       background: #f5f7fb;
-      padding: 24px 20px 40px;
       color: #1e293b;
     }
+
+    /* ===== 登入畫面 ===== */
+    .login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: linear-gradient(135deg, #eef2ff 0%, #f5f7fb 100%);
+    }
+    .login-card {
+      background: white;
+      border-radius: 28px;
+      padding: 40px 36px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.12);
+      border: 1px solid #edf2f7;
+    }
+    .login-card .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .login-card .logo i {
+      font-size: 32px;
+      color: #3b82f6;
+      background: #eff6ff;
+      padding: 12px;
+      border-radius: 18px;
+    }
+    .login-card h1 {
+      font-size: 22px;
+      font-weight: 700;
+      text-align: center;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+    .login-card .subtitle {
+      text-align: center;
+      font-size: 13px;
+      color: #64748b;
+      margin-bottom: 28px;
+    }
+    .login-card label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 6px;
+    }
+    .login-card input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      font-size: 15px;
+      font-family: inherit;
+      color: #0f172a;
+      margin-bottom: 18px;
+      transition: 0.1s;
+      background: #f8fafc;
+    }
+    .login-card input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+    }
+    .login-card button {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 12px;
+      background: #3b82f6;
+      color: white;
+      font-weight: 700;
+      font-size: 15px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .login-card button:hover { background: #2563eb; }
+    .login-card .error-msg {
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #991b1b;
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      margin-bottom: 18px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .login-card .error-msg.show { display: flex; }
+    .login-card .hint {
+      font-size: 12px;
+      color: #94a3b8;
+      text-align: center;
+      margin-top: 20px;
+      line-height: 1.6;
+    }
+
+    /* ===== 主畫面 (預設隱藏) ===== */
+    .app-screen {
+      display: none;
+      padding: 24px 20px 40px;
+    }
+    .app-screen.active { display: block; }
+
+    /* 登出按鈕 */
+    .logout-btn {
+      position: fixed;
+      top: 20px;
+      right: 24px;
+      z-index: 100;
+      background: white;
+      border: 1px solid #e2e8f0;
+      color: #334155;
+      padding: 8px 16px;
+      border-radius: 40px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      transition: 0.15s;
+    }
+    .logout-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
+
+    /* 以下為原本的儀表板樣式 */
     .dashboard {
       max-width: 1500px;
       margin: 0 auto;
     }
-
-    /* 頂部 */
     .header {
       display: flex;
       flex-wrap: wrap;
@@ -31,6 +169,7 @@
       justify-content: space-between;
       margin-bottom: 20px;
       gap: 20px;
+      padding-right: 120px;
     }
     .header h1 {
       font-size: 28px;
@@ -56,7 +195,6 @@
     .total-item .value { font-size: 22px; font-weight: 700; color: #0f172a; }
     .total-item .value small { font-size: 14px; font-weight: 500; color: #475569; margin-left: 4px; }
 
-    /* 工具列 */
     .toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -109,7 +247,6 @@
     }
     .toolbar button.secondary:hover { background: #e2e8f0; }
 
-    /* 存款提醒總覽橫幅 */
     .deposit-banner {
       border-radius: 18px;
       padding: 18px 24px;
@@ -125,11 +262,6 @@
       background: #f0fdf4;
       border-color: #86efac;
       color: #166534;
-    }
-    .deposit-banner.yellow {
-      background: #fffbeb;
-      border-color: #fde68a;
-      color: #92400e;
     }
     .deposit-banner.red {
       background: #fef2f2;
@@ -150,7 +282,6 @@
       color: #78350f;
     }
 
-    /* 銀行卡片 */
     .bank-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -244,7 +375,6 @@
       box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
     }
 
-    /* 存款提醒卡片內 */
     .deposit-alert {
       background: #fef2f2;
       border: 1px solid #fca5a5;
@@ -268,7 +398,6 @@
       margin-top: 4px;
     }
 
-    /* 支出項目列表 */
     .expense-section {
       margin-top: 10px;
       border-top: 1px solid #eef2f6;
@@ -371,7 +500,6 @@
       white-space: nowrap;
     }
 
-    /* 保險 & 其他開支 */
     .extra-section {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -440,97 +568,209 @@
       gap: 6px;
     }
 
-    /* 響應式 */
     @media (max-width: 700px) {
       .extra-section { grid-template-columns: 1fr; }
-      .header { flex-direction: column; align-items: flex-start; }
+      .header { flex-direction: column; align-items: flex-start; padding-right: 0; }
       .total-balance-card { width: 100%; gap: 20px; }
       .bank-grid { grid-template-columns: 1fr; }
       .toolbar { flex-direction: column; align-items: stretch; }
+      .logout-btn { top: 14px; right: 14px; padding: 6px 12px; font-size: 12px; }
     }
   </style>
 </head>
 <body>
-<div class="dashboard">
-  <!-- 頂部 -->
-  <div class="header">
-    <h1><i class="fas fa-wallet"></i> 澳門個人開支管理</h1>
-    <div class="total-balance-card">
-      <div class="total-item">
-        <span class="label">總餘額 (澳門幣)</span>
-        <span class="value" id="totalMop">0 <small>MOP</small></span>
-      </div>
-      <div class="total-item">
-        <span class="label">總餘額 (港幣)</span>
-        <span class="value" id="totalHkd">0 <small>HKD</small></span>
-      </div>
-      <div class="total-item">
-        <span class="label">總餘額 (人民幣)</span>
-        <span class="value" id="totalCny">0 <small>CNY</small></span>
-      </div>
-      <div class="total-item">
-        <span class="label">總餘額 (日元)</span>
-        <span class="value" id="totalJpy">0 <small>JPY</small></span>
-      </div>
+
+<!-- ===================== 登入畫面 ===================== -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="logo">
+      <i class="fas fa-lock"></i>
+    </div>
+    <h1>個人開支管理</h1>
+    <p class="subtitle">請登入以查看您的財務資料</p>
+
+    <div class="error-msg" id="loginError">
+      <i class="fas fa-exclamation-circle"></i>
+      <span id="loginErrorText">帳號或密碼錯誤，請重新輸入。</span>
+    </div>
+
+    <label for="username"><i class="fas fa-user"></i> 帳號</label>
+    <input type="text" id="username" placeholder="請輸入帳號" autocomplete="username">
+
+    <label for="password"><i class="fas fa-key"></i> 密碼</label>
+    <input type="password" id="password" placeholder="請輸入密碼" autocomplete="current-password">
+
+    <button id="loginBtn"><i class="fas fa-sign-in-alt"></i> 登入</button>
+
+    <div class="hint">
+      <i class="fas fa-info-circle"></i> 登入狀態會儲存在此裝置，下次開啟無需再次登入。<br>
+      在任何電腦或手機輸入正確帳密皆可登入。
     </div>
   </div>
+</div>
 
-  <!-- 工具列 -->
-  <div class="toolbar">
-    <label><i class="fas fa-calendar-day"></i> 檢查日期：</label>
-    <input type="date" id="checkDate">
-    <button id="btnCheckToday"><i class="fas fa-search"></i> 檢查今日</button>
-    <button id="btnCheckNext30" class="secondary"><i class="fas fa-calendar-week"></i> 檢查未來 30 日</button>
-    <span style="flex:1;"></span>
-    <span style="font-size:13px; color:#64748b;"><i class="fas fa-info-circle"></i> 存款提醒只顯示真正不足的第一個月份</span>
-  </div>
+<!-- ===================== 主畫面 ===================== -->
+<div class="app-screen" id="appScreen">
+  <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> 登出</button>
 
-  <!-- 存款提醒總覽 -->
-  <div id="depositBanner" class="deposit-banner green">
-    <i class="fas fa-check-circle"></i>
-    <div class="content" id="depositBannerContent">
-      <strong>一切正常</strong>
-      所有銀行在未來 6 個月內都有足夠餘額支付支出。
-    </div>
-  </div>
-
-  <!-- 銀行卡片 -->
-  <div class="bank-grid" id="bankGrid"></div>
-
-  <!-- 保險 & 其他開支 -->
-  <div class="extra-section">
-    <div class="extra-card">
-      <h3><i class="fas fa-shield-alt"></i> 保險支出</h3>
-      <div class="extra-item">
-        <div class="icon"><i class="fas fa-calendar-check"></i></div>
-        <div class="extra-content">
-          <div class="title">年度保險繳費</div>
-          <div class="desc" contenteditable="true" id="insuranceDetail">
-            每年7月10日交38000,8月10日交22000,9月10日交17100,9月22日交51000
-          </div>
+  <div class="dashboard">
+    <!-- 頂部 -->
+    <div class="header">
+      <h1><i class="fas fa-wallet"></i> 澳門個人開支管理</h1>
+      <div class="total-balance-card">
+        <div class="total-item">
+          <span class="label">總餘額 (澳門幣)</span>
+          <span class="value" id="totalMop">0 <small>MOP</small></span>
+        </div>
+        <div class="total-item">
+          <span class="label">總餘額 (港幣)</span>
+          <span class="value" id="totalHkd">0 <small>HKD</small></span>
+        </div>
+        <div class="total-item">
+          <span class="label">總餘額 (人民幣)</span>
+          <span class="value" id="totalCny">0 <small>CNY</small></span>
+        </div>
+        <div class="total-item">
+          <span class="label">總餘額 (日元)</span>
+          <span class="value" id="totalJpy">0 <small>JPY</small></span>
         </div>
       </div>
-      <div class="extra-note"><i class="fas fa-arrow-right"></i> 自動從 BOC 扣款</div>
     </div>
-    <div class="extra-card">
-      <h3><i class="fas fa-file-invoice"></i> 其他開支</h3>
-      <div class="extra-item">
-        <div class="icon"><i class="fas fa-tint"></i></div>
-        <div class="extra-content">
-          <div class="title">水費 · 電費 · 管理費</div>
-          <div class="desc" contenteditable="true" id="otherExpenses">
-            水費每月約500、電費每月約200、管理費645
+
+    <!-- 工具列 -->
+    <div class="toolbar">
+      <label><i class="fas fa-calendar-day"></i> 檢查日期：</label>
+      <input type="date" id="checkDate">
+      <button id="btnCheckToday"><i class="fas fa-search"></i> 檢查今日</button>
+      <button id="btnCheckNext30" class="secondary"><i class="fas fa-calendar-week"></i> 檢查未來 30 日</button>
+      <span style="flex:1;"></span>
+      <span style="font-size:13px; color:#64748b;"><i class="fas fa-info-circle"></i> 存款提醒只顯示真正不足的第一個月份</span>
+    </div>
+
+    <!-- 存款提醒總覽 -->
+    <div id="depositBanner" class="deposit-banner green">
+      <i class="fas fa-check-circle"></i>
+      <div class="content" id="depositBannerContent">
+        <strong>一切正常</strong>
+        所有銀行在未來 6 個月內都有足夠餘額支付支出。
+      </div>
+    </div>
+
+    <!-- 銀行卡片 -->
+    <div class="bank-grid" id="bankGrid"></div>
+
+    <!-- 保險 & 其他開支 -->
+    <div class="extra-section">
+      <div class="extra-card">
+        <h3><i class="fas fa-shield-alt"></i> 保險支出</h3>
+        <div class="extra-item">
+          <div class="icon"><i class="fas fa-calendar-check"></i></div>
+          <div class="extra-content">
+            <div class="title">年度保險繳費</div>
+            <div class="desc" contenteditable="true" id="insuranceDetail">
+              每年7月10日交38000,8月10日交22000,9月10日交17100,9月22日交51000
+            </div>
           </div>
         </div>
+        <div class="extra-note"><i class="fas fa-arrow-right"></i> 自動從 BOC 扣款</div>
       </div>
-      <div class="extra-note"><i class="fas fa-arrow-right"></i> 自動從 BOC 扣款</div>
+      <div class="extra-card">
+        <h3><i class="fas fa-file-invoice"></i> 其他開支</h3>
+        <div class="extra-item">
+          <div class="icon"><i class="fas fa-tint"></i></div>
+          <div class="extra-content">
+            <div class="title">水費 · 電費 · 管理費</div>
+            <div class="desc" contenteditable="true" id="otherExpenses">
+              水費每月約500、電費每月約200、管理費645
+            </div>
+          </div>
+        </div>
+        <div class="extra-note"><i class="fas fa-arrow-right"></i> 自動從 BOC 扣款</div>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
-  (function() {
-    // ========== 原始資料 ==========
+  // ============================================================
+  // 帳號密碼設定 (可自行修改)
+  // ============================================================
+  const VALID_USERNAME = 'admin';
+  const VALID_PASSWORD = '1234';
+  const AUTH_KEY = 'expense_app_logged_in';
+
+  // ============================================================
+  // 登入 / 登出邏輯
+  // ============================================================
+  const loginScreen = document.getElementById('loginScreen');
+  const appScreen = document.getElementById('appScreen');
+  const loginError = document.getElementById('loginError');
+  const loginErrorText = document.getElementById('loginErrorText');
+  const usernameInput = document.getElementById('username');
+  const passwordInput = document.getElementById('password');
+  const loginBtn = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  function showApp() {
+    loginScreen.style.display = 'none';
+    appScreen.classList.add('active');
+    // 初始化儀表板（只在登入後首次初始化）
+    if (!window.__dashboardInitialized) {
+      window.__dashboardInitialized = true;
+      if (typeof initDashboard === 'function') initDashboard();
+    }
+  }
+
+  function showLogin() {
+    loginScreen.style.display = 'flex';
+    appScreen.classList.remove('active');
+    usernameInput.value = '';
+    passwordInput.value = '';
+    loginError.classList.remove('show');
+  }
+
+  function checkAuth() {
+    const loggedIn = localStorage.getItem(AUTH_KEY);
+    if (loggedIn === 'true') {
+      showApp();
+    } else {
+      showLogin();
+    }
+  }
+
+  loginBtn.addEventListener('click', () => {
+    const user = usernameInput.value.trim();
+    const pass = passwordInput.value.trim();
+
+    if (user === VALID_USERNAME && pass === VALID_PASSWORD) {
+      localStorage.setItem(AUTH_KEY, 'true');
+      loginError.classList.remove('show');
+      showApp();
+    } else {
+      loginErrorText.textContent = '帳號或密碼錯誤，請重新輸入。';
+      loginError.classList.add('show');
+      passwordInput.value = '';
+      passwordInput.focus();
+    }
+  });
+
+  // 按 Enter 也可登入
+  passwordInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') loginBtn.click();
+  });
+  usernameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') passwordInput.focus();
+  });
+
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem(AUTH_KEY);
+    showLogin();
+  });
+
+  // ============================================================
+  // 儀表板邏輯 (原本的功能)
+  // ============================================================
+  function initDashboard() {
     const banksData = [
       { 
         name: 'BNU', icon: 'fa-building-columns', region: 'mo',
@@ -567,7 +807,6 @@
         hkdAmount: 0, hkdTime: '',
         creditCardAmount: '', creditCardDay: '1'
       },
-      // ===== 內地帳戶 (人民幣) =====
       { 
         name: 'BOC(內地)', icon: 'fa-building-columns', region: 'cn',
         balanceMop: 0, balanceHkd: 0, balanceCny: 15245.25, balanceJpy: 0,
@@ -598,7 +837,6 @@
       }
     ];
 
-    // ========== 保險事件 ==========
     const insuranceEvents = [
       { month: 7, day: 10, amount: 38000, desc: '保險 7月' },
       { month: 8, day: 10, amount: 22000, desc: '保險 8月' },
@@ -606,15 +844,12 @@
       { month: 9, day: 22, amount: 51000, desc: '保險 9月(原10月)' }
     ];
 
-    // ========== 其他開支 (已修正：水費 500) ==========
-    const otherMonthlyExpense = 500 + 200 + 645; // 水費 500 + 電費 200 + 管理費 645 = 1345
-
+    const otherMonthlyExpense = 500 + 200 + 645;
     const SALARY_DAY = 15;
     const SALARY_NORMAL = 66000;
     const SALARY_DOUBLE = 126000;
     const FORECAST_MONTHS = 6;
 
-    // ========== 輔助函數 ==========
     function parseNumber(val) {
       if (typeof val === 'number') return val;
       if (!val) return 0;
@@ -692,7 +927,6 @@
       return { mop, hkd, creditCard };
     }
 
-    // ========== 取得所有支出項目 (用於顯示) ==========
     function getAllExpenseItems() {
       const items = [];
       const today = new Date();
@@ -735,7 +969,6 @@
             }
           });
 
-          // 保險
           const insuranceAmt = getInsuranceForDate(date);
           if (insuranceAmt > 0) {
             insuranceEvents.forEach(ev => {
@@ -749,7 +982,6 @@
             });
           }
 
-          // 其他開支
           if (date.getDate() === 1) {
             items.push({
               date: new Date(date), dateStr: `${date.getMonth()+1}/${date.getDate()}`,
@@ -758,7 +990,6 @@
             });
           }
 
-          // 薪資收入
           if (date.getDate() === SALARY_DAY) {
             const salary = getSalaryForDate(date);
             if (salary > 0) {
@@ -776,7 +1007,6 @@
       return items;
     }
 
-    // ========== 核心：逐月模擬，只回傳「第一個真正不足的月份」 ==========
     function findFirstShortfall(bank) {
       let balance = parseNumber(bank.balanceMop);
       const today = new Date();
@@ -810,7 +1040,6 @@
           monthBalance -= (expense.mop + expense.creditCard);
         }
 
-        // 只有當月月底餘額 < 0 才視為不足
         if (monthBalance < 0) {
           return {
             year: year,
@@ -827,7 +1056,6 @@
       return null;
     }
 
-    // ========== 產生所有銀行的存款提醒 ==========
     function generateDepositReminders() {
       const reminders = [];
       banksData.forEach(bank => {
@@ -843,7 +1071,6 @@
       return reminders;
     }
 
-    // ========== 取得該銀行在指定日期的當前餘額 ==========
     function getBankBalanceAtDate(bank, targetDate) {
       const today = new Date();
       today.setHours(0,0,0,0);
@@ -879,7 +1106,6 @@
       return balance;
     }
 
-    // ========== 更新 UI ==========
     const bankGrid = document.getElementById('bankGrid');
     const depositBanner = document.getElementById('depositBanner');
     const depositBannerContent = document.getElementById('depositBannerContent');
@@ -895,10 +1121,8 @@
       const targetDateStr = checkDateInput.value;
       const targetDate = new Date(targetDateStr + 'T00:00:00');
 
-      // 產生存款提醒
       const reminders = generateDepositReminders();
 
-      // 更新頂部存款提醒橫幅
       if (reminders.length > 0) {
         depositBanner.className = 'deposit-banner red';
         let html = `<strong><i class="fas fa-exclamation-triangle"></i> 存款提醒 — 以下銀行未來會餘額不足</strong><ul>`;
@@ -915,7 +1139,6 @@
         `;
       }
 
-      // 渲染銀行卡片
       bankGrid.innerHTML = '';
 
       banksData.forEach((bank, index) => {
@@ -1000,7 +1223,6 @@
           `;
         }
 
-        // 存款提醒區塊
         let depositAlertHtml = '';
         if (bankReminder) {
           depositAlertHtml = `
@@ -1014,7 +1236,6 @@
           `;
         }
 
-        // 信用卡還款區塊
         const creditCardHtml = bank.region === 'mo' ? `
           <div style="background:#fefce8; border-radius:14px; padding:12px 14px; margin-bottom:14px; border:1px solid #fde68a;">
             <div style="font-size:12px; font-weight:700; color:#92400e; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
@@ -1029,7 +1250,6 @@
           </div>
         ` : '';
 
-        // 支出項目列表
         let expenseHtml = '';
         if (bank.region === 'mo') {
           const allItems = getAllExpenseItems();
@@ -1109,7 +1329,6 @@
         bankGrid.appendChild(card);
       });
 
-      // 更新總餘額
       let totalMop = 0, totalHkd = 0, totalCny = 0, totalJpy = 0;
       banksData.forEach((bank, index) => {
         if (bank.region === 'cn') {
@@ -1186,7 +1405,6 @@
       renderAll();
     }
 
-    // ========== 事件綁定 ==========
     document.getElementById('btnCheckToday').addEventListener('click', () => {
       const today = new Date();
       checkDateInput.value = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
@@ -1210,8 +1428,12 @@
         document.execCommand('insertText', false, text);
       });
     });
+  }
 
-  })();
+  // ============================================================
+  // 啟動：檢查登入狀態
+  // ============================================================
+  checkAuth();
 </script>
 </body>
 </html>
